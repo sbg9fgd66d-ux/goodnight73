@@ -23,7 +23,9 @@
     --sans:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
   }
   *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-  html,body{height:100%;}
+  html{background:#07070f;}
+  html,body{height:100%; overscroll-behavior:none;}
+  body{position:fixed; inset:0; overflow:hidden;}
   body{
     font-family:var(--sans); color:var(--ink); overflow:hidden;
     background:#07070f;
@@ -871,9 +873,10 @@ if('mediaSession' in navigator){
     requestAnimationFrame(loop);
     if(now-last<33) return;                          // ~30fps
     last=now;
-    glassT+=((homeEl.classList.contains('active')?1:0)-glassT)*.13;
+    const ease=(c,t)=> t>c ? c+(t-c)*.13 : c+(t-c)*.34;   // 进场从容，退场加速
+    glassT=ease(glassT, homeEl.classList.contains('active')?1:0);
     if(glassT<.003)glassT=0;
-    glassW+=((welEl.classList.contains('active')?1:0)-glassW)*.13;
+    glassW=ease(glassW, welEl.classList.contains('active')?1:0);
     if(glassW<.003)glassW=0;
     const scale=cv.width/innerWidth;
     if(glassT>0){ lensUniform(uL1,gw1,scale,20,16); lensUniform(uL2,gw2,scale,30,26); }
@@ -894,7 +897,7 @@ if('mediaSession' in navigator){
       dch1.style.left=d1x+'px'; dch1.style.top=d1y+'px';
       dch2.style.left=d2x+'px'; dch2.style.top=d2y+'px';
     }
-    glassP+=((playerScr.classList.contains('active')?1:0)-glassP)*.13;
+    glassP=ease(glassP, playerScr.classList.contains('active')?1:0);
     if(glassP<.003)glassP=0;
     morphT+=((playerScr.classList.contains('playing')?1:0)-morphT)*.07;
     if(morphT<.001)morphT=0;
