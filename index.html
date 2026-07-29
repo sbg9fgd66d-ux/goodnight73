@@ -23,7 +23,9 @@
     --sans:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
   }
   *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-  html,body{height:100%;}
+  html{background:#07070f;}
+  html,body{height:100%; overscroll-behavior:none;}
+  body{position:fixed; inset:0; overflow:hidden;}
   body{
     font-family:var(--sans); color:var(--ink); overflow:hidden;
     background:#07070f;
@@ -53,13 +55,17 @@
   #grain{position:fixed;inset:0;z-index:30;pointer-events:none;
      mix-blend-mode:soft-light;opacity:.11;background-repeat:repeat;}
 
+  #flow,.vignette,#grain,canvas.fx,.fluid{
+    height:calc(100lvh + env(safe-area-inset-bottom,0px) + 24px);}
+  @supports not (height:100lvh){#flow,.vignette,#grain,canvas.fx,.fluid{
+    height:calc(100vh + env(safe-area-inset-bottom,0px) + 24px);}}
   .screen{
     position:fixed; inset:0; z-index:4;
     display:flex; flex-direction:column; align-items:center; justify-content:center;
-    opacity:0; visibility:hidden; transition:opacity 1.1s ease, visibility 1.1s ease;
+    opacity:0; visibility:hidden; transition:opacity .16s ease, visibility .16s ease;
     padding:calc(env(safe-area-inset-top) + 24px) 22px calc(env(safe-area-inset-bottom) + 24px);
   }
-  .screen.active{opacity:1; visibility:visible;}
+  .screen.active{opacity:1; visibility:visible; transition:opacity .9s ease, visibility .9s ease;}
 
   /* ---------- welcome ---------- */
   #welcome{cursor:pointer;}
@@ -135,7 +141,7 @@
     font-family:var(--serif); color:transparent; pointer-events:none; z-index:5;
     background:linear-gradient(178deg, rgba(250,251,255,.96) 20%, rgba(215,220,238,.62) 78%);
     -webkit-background-clip:text; background-clip:text;}
-  #dch1{font-size:16px;} #dch2{font-size:9px;}
+  #dch1{font-size:19px;} #dch2{font-size:9px;}
   .wsub{position:absolute; top:52%; left:50%; transform:translateX(-50%);
     font-family:var(--serif); font-size:14px; letter-spacing:.42em;
     writing-mode:vertical-rl; white-space:nowrap; color:transparent;
@@ -330,7 +336,8 @@ const LIBRARY = {
 
 /* ---------------- 萤火虫光点（漂浮 · 呼吸） ---------------- */
 const bg = document.getElementById('bgstars'), bx = bg.getContext('2d');
-function sizeCanvas(c){ c.width = innerWidth*devicePixelRatio; c.height = innerHeight*devicePixelRatio; }
+function sizeCanvas(c){ const r=c.getBoundingClientRect();
+  c.width = Math.max(2,r.width*devicePixelRatio|0); c.height = Math.max(2,r.height*devicePixelRatio|0); }
 // 预制柔光精灵（一次生成，反复贴图，省性能）
 function makeGlow(color){
   const s=64, cv=document.createElement('canvas'); cv.width=cv.height=s;
@@ -477,7 +484,10 @@ addEventListener('mousemove',e=>{
   const now=Date.now(); if(now-lastMove<28)return; lastMove=now; spawn(e.clientX,e.clientY,false);
 });
 addEventListener('touchmove',e=>{
-  const t=e.touches[0]; if(t) shakeFeed(t.clientX,t.clientY);
+  const t=e.touches[0]; if(!t) return;
+  shakeFeed(t.clientX,t.clientY);
+  const now=Date.now();                       // 手指滑动也撒萤火虫（同鼠标轨迹）
+  if(now-lastMove>=38){ lastMove=now; spawn(t.clientX,t.clientY,false); }
 },{passive:true});
 
 // tap-on-click for non-interactive areas also sprinkles
@@ -844,7 +854,8 @@ if('mediaSession' in navigator){
 
   function sizeFlow(){
     const sc=Math.min(devicePixelRatio,2)*0.70;
-    cv.width=Math.max(2,innerWidth*sc|0); cv.height=Math.max(2,innerHeight*sc|0);
+    const r=cv.getBoundingClientRect();
+    cv.width=Math.max(2,r.width*sc|0); cv.height=Math.max(2,r.height*sc|0);
     gl.viewport(0,0,cv.width,cv.height);
   }
   sizeFlow(); addEventListener('resize',sizeFlow);
@@ -871,30 +882,31 @@ if('mediaSession' in navigator){
     requestAnimationFrame(loop);
     if(now-last<33) return;                          // ~30fps
     last=now;
-    glassT+=((homeEl.classList.contains('active')?1:0)-glassT)*.13;
+    const ease=(c,t)=> t>c ? c+(t-c)*.13 : c+(t-c)*.62;   // 进场从容，退场近乎立即
+    glassT=ease(glassT, homeEl.classList.contains('active')?1:0);
     if(glassT<.003)glassT=0;
-    glassW+=((welEl.classList.contains('active')?1:0)-glassW)*.13;
+    glassW=ease(glassW, welEl.classList.contains('active')?1:0);
     if(glassW<.003)glassW=0;
-    const scale=cv.width/innerWidth;
+    const scale=cv.width/cv.getBoundingClientRect().width;   // 实测換算，任何视口都对齐
     if(glassT>0){ lensUniform(uL1,gw1,scale,20,16); lensUniform(uL2,gw2,scale,30,26); }
     if(glassW>0){
       const r0=gw0.getBoundingClientRect();
       const txc=(r0.left+r0.right)/2, tyc=(r0.top+r0.bottom)/2;   // CSS px
       const Rc=(r0.height/2)+40;
       const bxc=txc+Rc*.68;
-      gl.uniform4f(uM0,bxc*scale,cv.height-(tyc-9)*scale,Rc*scale,0);
+      gl.uniform4f(uM0,bxc*scale,cv.height-(tyc-14)*scale,Rc*scale,0);
       gl.uniform4f(uM1,Rc*.52*scale,Rc*.20*scale,Rc*.94*scale,0);
       // 两滴水滴：跟着月亮 + 各自轻浮
       const t=now/1000;
-      const d1x=bxc+Rc*.42, d1y=tyc-Rc*.52+Math.sin(t*.45)*5;
-      const d2x=bxc+Rc*1.10, d2y=tyc-Rc*.82+Math.sin(t*.62+2.1)*4;
-      const r1=Rc*.27, r2=Rc*.16;
+      const d1x=bxc+Rc*.28, d1y=tyc-Rc*.52+Math.sin(t*.45)*5;
+      const d2x=bxc+Rc*.96, d2y=tyc-Rc*.82+Math.sin(t*.62+2.1)*4;
+      const r1=Rc*.31, r2=Rc*.16;
       gl.uniform4f(uD1,d1x*scale,cv.height-d1y*scale,r1*scale,Rc*.55*scale);
       gl.uniform4f(uD2,d2x*scale,cv.height-d2y*scale,r2*scale,Rc*.38*scale);
       dch1.style.left=d1x+'px'; dch1.style.top=d1y+'px';
       dch2.style.left=d2x+'px'; dch2.style.top=d2y+'px';
     }
-    glassP+=((playerScr.classList.contains('active')?1:0)-glassP)*.13;
+    glassP=ease(glassP, playerScr.classList.contains('active')?1:0);
     if(glassP<.003)glassP=0;
     morphT+=((playerScr.classList.contains('playing')?1:0)-morphT)*.07;
     if(morphT<.001)morphT=0;
