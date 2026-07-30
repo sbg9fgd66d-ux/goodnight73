@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>晚安</title>
 <meta name="description" content="睡前故事与碎碎念">
 <meta name="theme-color" content="#0a0a1c">
@@ -25,6 +25,7 @@
   *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
   html{background:#07070f;}
   html,body{height:100%; overflow:hidden; overscroll-behavior:none;}
+  body{min-height:100vh; min-height:100dvh;}
   body{
     font-family:var(--sans); color:var(--ink); overflow:hidden;
     background:#07070f;
@@ -55,7 +56,7 @@
      mix-blend-mode:soft-light;opacity:.11;background-repeat:repeat;}
 
   #flow,.vignette,#grain,canvas.fx,.fluid{
-    top:0; left:0; right:0; height:calc(100% + 90px);}   /* 显式高度：canvas 等替换元素也生效，越过视口底 90px */
+    top:0; left:0; right:0; height:calc(100% + 90px); min-height:calc(100dvh + 60px);}   /* 显式高度：canvas 等替换元素也生效，越过视口底 90px */
   .screen{
     position:fixed; inset:0; z-index:4;
     display:flex; flex-direction:column; align-items:center; justify-content:center;
