@@ -23,12 +23,12 @@
     --sans:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
   }
   *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-  html{background:#07070f;}
+  html{background:#000;}
   html,body{height:100%; overflow:hidden; overscroll-behavior:none;}
   body{min-height:100vh; min-height:100dvh;}
   body{
     font-family:var(--sans); color:var(--ink); overflow:hidden;
-    background:#07070f;
+    background:#000;
     -webkit-user-select:none; user-select:none;
     padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
   }
@@ -55,6 +55,8 @@
   #grain{position:fixed;inset:0;z-index:30;pointer-events:none;
      mix-blend-mode:soft-light;opacity:.11;background-repeat:repeat;}
 
+  .bfade{position:fixed; left:0; right:0; bottom:0; height:150px; z-index:3; pointer-events:none;
+    background:linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,.55) 55%, #000 100%);}
   #flow,.vignette,#grain,canvas.fx,.fluid{
     top:0; left:0; right:0; height:calc(100% + 90px); min-height:calc(100dvh + 60px);}   /* 显式高度：canvas 等替换元素也生效，越过视口底 90px */
   .screen{
@@ -257,6 +259,7 @@
 </div>
 <canvas id="flow"></canvas>
 <div class="vignette"></div>
+<div class="bfade"></div>
 <div id="grain"></div>
 <canvas id="bgstars" class="fx"></canvas>
 <canvas id="falling" class="fx"></canvas>
@@ -867,13 +870,15 @@ if('mediaSession' in navigator){
     gl.viewport(0,0,cv.width,cv.height);
   }
   function fitBG(){
-    const H=Math.max(innerHeight,
+    const cand=[innerHeight,
       document.documentElement.clientHeight||0,
-      (window.visualViewport?visualViewport.height:0)||0,
-      screen.height||0);
+      (window.visualViewport?visualViewport.height:0)||0];
+    if(screen.height && screen.height-innerHeight<160) cand.push(screen.height); // 物理屏高只在近全屏(手机)时采用
+    const H=Math.max.apply(null,cand);
     document.querySelectorAll('#flow,.vignette,#grain,canvas.fx').forEach(el=>{
       el.style.height=(H+60)+'px';
     });
+    initBg(); initFall();                       // 重建粒子画布缓存，与新尺寸对齐
   }
   fitBG(); sizeFlow();
   addEventListener('resize',()=>{fitBG(); sizeFlow();});
