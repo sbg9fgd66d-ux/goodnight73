@@ -7,7 +7,7 @@
 
 1. 在 iPhone 上用 Safari 浏览器 打开这个链接(不要在微信里打开):
 
-   → 这里填网址 ←
+https://sbg9fgd66d-ux.github.io/goodnight73/
 
 2. 点屏幕底部中间的 分享按钮(一个方框加向上的箭头)。
 
