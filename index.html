@@ -24,8 +24,7 @@
   }
   *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
   html{background:#07070f;}
-  html,body{height:100%; overscroll-behavior:none;}
-  body{position:fixed; inset:0; overflow:hidden;}
+  html,body{height:100%; overflow:hidden; overscroll-behavior:none;}
   body{
     font-family:var(--sans); color:var(--ink); overflow:hidden;
     background:#07070f;
@@ -178,7 +177,7 @@
 
   .seek{position:absolute; left:50%; transform:translateX(-50%); width:min(86vw,420px); top:50%;
         transition:top 1s cubic-bezier(.4,0,.2,1);}
-  #player.playing .seek{top:calc(100% - 92px - env(safe-area-inset-bottom));}
+  #player.playing .seek{top:calc(100% - 70px - env(safe-area-inset-bottom));}
   input[type=range]{
     -webkit-appearance:none; width:100%; height:3px; border-radius:3px; cursor:pointer;
     background:rgba(255,255,255,.16); outline:none;
@@ -212,7 +211,7 @@
 
   .timer{position:absolute; left:0; right:0; top:59%; text-align:center;
         transition:top 1s cubic-bezier(.4,0,.2,1);}
-  #player.playing .timer{top:calc(100% - 40px - env(safe-area-inset-bottom));}
+  #player.playing .timer{top:calc(100% - 47px - env(safe-area-inset-bottom));}
   .timer .lab{color:var(--ink-dim); font-size:12px; letter-spacing:.18em; margin-bottom:12px;
         cursor:pointer; transition:opacity .95s ease;}
   .chips{display:flex; flex-wrap:nowrap; gap:7px; justify-content:center; transition:opacity .95s ease;}
@@ -221,6 +220,8 @@
   #player.playing .timer.reveal .lab{opacity:0;}
   #player.playing .timer-status{opacity:0;}
   .timer-status{transition:opacity .5s ease;}
+  #player.playing .times{transition:opacity .95s ease;}
+  #player.treveal .times{opacity:0;}
   .chip{
     border:none; background:none; color:var(--ink-dim);
     padding:7px 10px; font-size:12.5px; cursor:pointer; letter-spacing:.10em;
@@ -584,7 +585,7 @@ function nextTrack(){
   load((curIdx+1)%n,true);
 }
 audio.addEventListener('play',()=>{isPlaying=true;setPlayIcon(true);renderList();document.getElementById('player').classList.add('playing');});
-audio.addEventListener('pause',()=>{isPlaying=false;setPlayIcon(false);renderList();const pl=document.getElementById('player');pl.classList.remove('playing');pl.querySelector('.timer').classList.remove('reveal');});
+audio.addEventListener('pause',()=>{isPlaying=false;setPlayIcon(false);renderList();const pl=document.getElementById('player');pl.classList.remove('playing');pl.classList.remove('treveal');pl.querySelector('.timer').classList.remove('reveal');});
 audio.addEventListener('ended',()=>{
   if(timerMode===-1){ stopFade(); return; }      // 本段结束
   nextTrack();
@@ -642,10 +643,11 @@ function stopFade(){
 (function(){
   const pl=document.getElementById('player');
   const tm=pl.querySelector('.timer'), lab=tm.querySelector('.lab');
-  function hideLater(ms){ clearTimeout(tm._rt); tm._rt=setTimeout(()=>tm.classList.remove('reveal'),ms); }
+  function hideLater(ms){ clearTimeout(tm._rt);
+    tm._rt=setTimeout(()=>{tm.classList.remove('reveal'); pl.classList.remove('treveal');},ms); }
   lab.addEventListener('click',()=>{
     if(!pl.classList.contains('playing'))return;
-    tm.classList.add('reveal'); hideLater(3400);
+    tm.classList.add('reveal'); pl.classList.add('treveal'); hideLater(3400);
   });
   tm.querySelectorAll('.chip').forEach(ch=>ch.addEventListener('click',()=>{
     if(pl.classList.contains('playing')) hideLater(1900);
@@ -863,7 +865,17 @@ if('mediaSession' in navigator){
     cv.width=Math.max(2,r.width*sc|0); cv.height=Math.max(2,r.height*sc|0);
     gl.viewport(0,0,cv.width,cv.height);
   }
-  sizeFlow(); addEventListener('resize',sizeFlow);
+  function fitBG(){
+    const H=Math.max(innerHeight,
+      document.documentElement.clientHeight||0,
+      (window.visualViewport?visualViewport.height:0)||0,
+      screen.height||0);
+    document.querySelectorAll('#flow,.vignette,#grain,canvas.fx').forEach(el=>{
+      el.style.height=(H+60)+'px';
+    });
+  }
+  fitBG(); sizeFlow();
+  addEventListener('resize',()=>{fitBG(); sizeFlow();});
   document.querySelector('.fluid').style.display='none';
   document.body.classList.add('gl');
 
