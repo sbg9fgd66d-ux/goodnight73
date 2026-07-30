@@ -56,9 +56,7 @@
      mix-blend-mode:soft-light;opacity:.11;background-repeat:repeat;}
 
   #flow,.vignette,#grain,canvas.fx,.fluid{
-    height:calc(100lvh + env(safe-area-inset-bottom,0px) + 24px);}
-  @supports not (height:100lvh){#flow,.vignette,#grain,canvas.fx,.fluid{
-    height:calc(100vh + env(safe-area-inset-bottom,0px) + 24px);}}
+    top:0; left:0; right:0; height:calc(100% + 90px);}   /* 显式高度：canvas 等替换元素也生效，越过视口底 90px */
   .screen{
     position:fixed; inset:0; z-index:4;
     display:flex; flex-direction:column; align-items:center; justify-content:center;
@@ -141,7 +139,7 @@
     font-family:var(--serif); color:transparent; pointer-events:none; z-index:5;
     background:linear-gradient(178deg, rgba(250,251,255,.96) 20%, rgba(215,220,238,.62) 78%);
     -webkit-background-clip:text; background-clip:text;}
-  #dch1{font-size:19px;} #dch2{font-size:9px;}
+  #dch1{font-size:24px;} #dch2{font-size:9px;}
   .wsub{position:absolute; top:52%; left:50%; transform:translateX(-50%);
     font-family:var(--serif); font-size:14px; letter-spacing:.42em;
     writing-mode:vertical-rl; white-space:nowrap; color:transparent;
@@ -166,9 +164,9 @@
   .pcat{font-family:var(--serif); font-size:19px; letter-spacing:.16em; color:transparent;
     background:linear-gradient(178deg, rgba(250,251,255,.92) 20%, rgba(215,220,238,.58) 78%);
     -webkit-background-clip:text; background-clip:text;}
-  .stage{position:absolute; left:0; right:0; top:17%; display:flex; flex-direction:column; align-items:center;
+  .stage{position:absolute; left:0; right:0; top:13%; pointer-events:none; display:flex; flex-direction:column; align-items:center;
         transition:top 1s cubic-bezier(.4,0,.2,1);}
-  #player.playing .stage{top:calc(env(safe-area-inset-top) + 52px);}
+  #player.playing .stage{top:calc(env(safe-area-inset-top) + 16px);}
   .track-title{font-family:var(--serif); font-size:23px; letter-spacing:.12em; text-align:center; min-height:30px;
     color:transparent;
     background:linear-gradient(178deg, rgba(250,251,255,.96) 20%, rgba(215,220,238,.62) 78%);
@@ -178,9 +176,9 @@
   @keyframes ttbob{0%,100%{transform:translateY(0);}50%{transform:translateY(-7px);}}
   .track-hint{margin-top:8px;color:var(--ink-dim);font-size:12px;letter-spacing:.1em;}
 
-  .seek{position:absolute; left:50%; transform:translateX(-50%); width:min(86vw,420px); top:47%;
+  .seek{position:absolute; left:50%; transform:translateX(-50%); width:min(86vw,420px); top:50%;
         transition:top 1s cubic-bezier(.4,0,.2,1);}
-  #player.playing .seek{top:calc(100% - 132px - env(safe-area-inset-bottom));}
+  #player.playing .seek{top:calc(100% - 92px - env(safe-area-inset-bottom));}
   input[type=range]{
     -webkit-appearance:none; width:100%; height:3px; border-radius:3px; cursor:pointer;
     background:rgba(255,255,255,.16); outline:none;
@@ -193,7 +191,7 @@
   .times{display:flex;justify-content:space-between;margin-top:8px;color:var(--ink-dim);font-size:11px;font-variant-numeric:tabular-nums;}
 
   .controls{position:absolute; left:0; right:0; top:33%;
-        display:flex;align-items:center;justify-content:center;gap:38px;}
+        display:flex;align-items:center;justify-content:center;gap:16px;}
   .gl #player .ctl svg{opacity:0; transition:opacity .9s ease;}
   .gl #player.playing .play svg{opacity:1; animation:iconbob 3s ease-in-out infinite;}
   @keyframes iconbob{0%,100%{transform:translateY(2px);}50%{transform:translateY(-3px);}}
@@ -203,7 +201,7 @@
   #player.playing #next{transform:translateX(30px) scale(.78);}
   .ctl svg{width:26px;height:26px;fill:currentColor;}
   .play{
-    width:66px;height:66px;border-radius:50%;
+    width:112px;height:96px;border-radius:50%;
     background:none; border:none;
     display:flex;align-items:center;justify-content:center;
     transition:transform .2s ease;
@@ -212,9 +210,9 @@
   .play:active{transform:scale(.94);}
   .play svg{width:26px;height:26px;}
 
-  .timer{position:absolute; left:0; right:0; top:56%; text-align:center;
+  .timer{position:absolute; left:0; right:0; top:59%; text-align:center;
         transition:top 1s cubic-bezier(.4,0,.2,1);}
-  #player.playing .timer{top:calc(100% - 72px - env(safe-area-inset-bottom));}
+  #player.playing .timer{top:calc(100% - 40px - env(safe-area-inset-bottom));}
   .timer .lab{color:var(--ink-dim); font-size:12px; letter-spacing:.18em; margin-bottom:12px;
         cursor:pointer; transition:opacity .95s ease;}
   .chips{display:flex; flex-wrap:nowrap; gap:7px; justify-content:center; transition:opacity .95s ease;}
@@ -232,7 +230,7 @@
   .timer-status{margin-top:12px; color:var(--ink-dim); font-size:11.5px; letter-spacing:.08em; min-height:16px;}
 
   .list{position:absolute; left:50%; transform:translateX(-50%); width:min(86vw,420px);
-        top:65%; bottom:10px; overflow-y:auto; -webkit-overflow-scrolling:touch;
+        top:67%; bottom:10px; overflow-y:auto; -webkit-overflow-scrolling:touch;
         transition:opacity .6s ease;}
   #player.playing .list{opacity:0; pointer-events:none;}
   .row{
@@ -272,7 +270,7 @@
 
 <!-- HOME -->
 <section id="home" class="screen">
-  <div class="gword" id="gw1" data-cat="pian">碎　片</div>
+  <div class="gword" id="gw1" data-cat="pian">碎片</div>
   <div class="gword gword-fr" id="gw2" data-cat="hua">Contes de fées</div>
 </section>
 
@@ -570,7 +568,14 @@ function load(i,autoplay){
 }
 $('play').addEventListener('click',()=>{
   if(curIdx<0){ load(0,true); return; }
-  if(audio.paused) audio.play().catch(()=>{}); else audio.pause();
+  if(audio.paused){
+    const pos=audio.currentTime;
+    const p=audio.play();
+    if(p) p.catch(()=>{                       // iOS 偶发拒绝时重载续播
+      try{ audio.load(); audio.currentTime=pos;
+           audio.play().catch(()=>{}); }catch(e){}
+    });
+  } else audio.pause();
 });
 $('prev').addEventListener('click',()=>load(curIdx<=0?LIBRARY[curCat].tracks.length-1:curIdx-1,true));
 $('next').addEventListener('click',()=>nextTrack());
@@ -691,7 +696,7 @@ if('mediaSession' in navigator){
   ' float g3=smoothstep(.15,.65,d);\n'+
   ' float L=fbmS(p*.5+vec2(7.7,3.1)+vec2(.024*t,-.016*t));\n'+
   ' float spot=.66+.95*smoothstep(.44,.78,L);\n'+
-  ' float lum=clamp((.42*g1+.26*g2+.18*g3+.12*d)*spot*.60,0.,1.);\n'+
+  ' float lum=clamp((.42*g1+.26*g2+.18*g3+.12*d)*spot*.48,0.,1.);\n'+
   ' lum=pow(lum,1.15);\n'+
   ' vec3 base=vec3(.031,.035,.047);\n'+
   ' vec3 cool=vec3(.588,.631,.639);\n'+
@@ -888,7 +893,7 @@ if('mediaSession' in navigator){
     glassW=ease(glassW, welEl.classList.contains('active')?1:0);
     if(glassW<.003)glassW=0;
     const scale=cv.width/cv.getBoundingClientRect().width;   // 实测換算，任何视口都对齐
-    if(glassT>0){ lensUniform(uL1,gw1,scale,20,16); lensUniform(uL2,gw2,scale,30,26); }
+    if(glassT>0){ lensUniform(uL1,gw1,scale,33,16); lensUniform(uL2,gw2,scale,30,26); }
     if(glassW>0){
       const r0=gw0.getBoundingClientRect();
       const txc=(r0.left+r0.right)/2, tyc=(r0.top+r0.bottom)/2;   // CSS px
@@ -899,10 +904,10 @@ if('mediaSession' in navigator){
       // 两滴水滴：跟着月亮 + 各自轻浮
       const t=now/1000;
       const d1x=bxc+Rc*.28, d1y=tyc-Rc*.52+Math.sin(t*.45)*5;
-      const d2x=bxc+Rc*.96, d2y=tyc-Rc*.82+Math.sin(t*.62+2.1)*4;
-      const r1=Rc*.31, r2=Rc*.16;
-      gl.uniform4f(uD1,d1x*scale,cv.height-d1y*scale,r1*scale,Rc*.55*scale);
-      gl.uniform4f(uD2,d2x*scale,cv.height-d2y*scale,r2*scale,Rc*.38*scale);
+      const d2x=bxc+Rc*1.08, d2y=tyc-Rc*.88+Math.sin(t*.62+2.1)*4;
+      const r1=Rc*.33, r2=Rc*.225;
+      gl.uniform4f(uD1,d1x*scale,cv.height-d1y*scale,r1*scale,Rc*.80*scale);
+      gl.uniform4f(uD2,d2x*scale,cv.height-d2y*scale,r2*scale,Rc*.545*scale);
       dch1.style.left=d1x+'px'; dch1.style.top=d1y+'px';
       dch2.style.left=d2x+'px'; dch2.style.top=d2y+'px';
     }
@@ -914,7 +919,7 @@ if('mediaSession' in navigator){
       const si=(u,el,f,kind)=>{const r=el.getBoundingClientRect();
         gl.uniform4f(u,(r.left+r.right)/2*scale,cv.height-(r.top+r.bottom)/2*scale,
                      r.height*f*scale,kind);};
-      si(uPa,playB,.30,1); si(uPb,prevB,.36,2); si(uPc,nextB,.36,3);
+      si(uPa,playB,.206,1); si(uPb,prevB,.36,2); si(uPc,nextB,.36,3);
     }
     gl.uniform1f(uGp,glassP); gl.uniform1f(uMorph,morphT);
     gl.uniform1f(uGlass,glassT); gl.uniform1f(uGw,glassW);
@@ -936,8 +941,7 @@ if('mediaSession' in navigator){
   c.putImageData(im,0,0);
   const d=document.getElementById('grain');
   d.style.backgroundImage='url('+g.toDataURL()+')';
-  let k=0;
-  setInterval(()=>{k=(k+1)&7; d.style.backgroundPosition=(k*37)+'px '+((k*61)&127)+'px';},90);
+  // 噪点改为静态
 })();
 
 /* service worker（离线可用） */
